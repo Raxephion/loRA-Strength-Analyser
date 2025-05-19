@@ -19,7 +19,7 @@ A Python script to analyze images generated using a LoRA (Low-Rank Adaptation) m
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repo-url>
+    git clone https://github.com/Raxephion/loRA-Strength-Analyser.git
     cd lora-strength-analyzer
     ```
 
