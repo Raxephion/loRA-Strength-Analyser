@@ -1,4 +1,6 @@
 # LoRA Strength Analyzer
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Python script to analyze images generated using a LoRA (Low-Rank Adaptation) model applied at various strength levels. This tool helps determine an optimal strength for a given LoRA by evaluating image quality and similarity to control images.
 
