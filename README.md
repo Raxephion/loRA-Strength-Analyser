@@ -5,301 +5,58 @@
 A Python script to analyze images generated using a LoRA (Low-Rank Adaptation) model applied at various strength levels. This tool helps determine an optimal strength for a given LoRA by evaluating image quality and similarity to control images.
 
 
-## What is is
-📐 1. SSIM (Structural Similarity Index)
-SSIM measures similarity between two images (a LoRA image and a control image), focusing on luminance, contrast, and structure. The general form is:
+📊 What It Is
+LoRA Strength Analyzer is a utility for evaluating how different LoRA (Low-Rank Adaptation) strengths affect image quality and similarity. It compares each LoRA-generated image to a corresponding control image using two key metrics:
 
-SSIM
-(
-𝑥
-,
-𝑦
-)
-=
-[
-𝑙
-(
-𝑥
-,
-𝑦
-)
-]
-𝛼
-⋅
-[
-𝑐
-(
-𝑥
-,
-𝑦
-)
-]
-𝛽
-⋅
-[
-𝑠
-(
-𝑥
-,
-𝑦
-)
-]
-𝛾
-SSIM(x,y)=[l(x,y)] 
-α
- ⋅[c(x,y)] 
-β
- ⋅[s(x,y)] 
-γ
- 
+🧠 1. Structural Similarity Index (SSIM)
+SSIM measures how similar two images are in terms of luminance, contrast, and structure. The formula is:
+SSIM(x, y) = 
+    (2 * μx * μy + C1) * (2 * σxy + C2)
+    -----------------------------------
+    (μx² + μy² + C1) * (σx² + σy² + C2)
+
+
 Where:
 
-𝑥
-x, 
-𝑦
-y = image patches (usually grayscale)
+μx, μy = mean of image patches x and y
 
-𝑙
-(
-𝑥
-,
-𝑦
-)
-l(x,y) = luminance comparison
+σx², σy² = variance of x and y
 
-𝑐
-(
-𝑥
-,
-𝑦
-)
-c(x,y) = contrast comparison
+σxy = covariance between x and y
 
-𝑠
-(
-𝑥
-,
-𝑦
-)
-s(x,y) = structure comparison
+C1, C2 = constants to avoid division by zero
 
-And the sub-components are:
+Interpretation:
 
-Luminance:
+SSIM ≈ 1.0 → Very similar images (minimal LoRA effect)
 
-𝑙
-(
-𝑥
-,
-𝑦
-)
-=
-2
-𝜇
-𝑥
-𝜇
-𝑦
-+
-𝐶
-1
-𝜇
-𝑥
-2
-+
-𝜇
-𝑦
-2
-+
-𝐶
-1
-l(x,y)= 
-μ 
-x
-2
-​
- +μ 
-y
-2
-​
- +C 
-1
-​
- 
-2μ 
-x
-​
- μ 
-y
-​
- +C 
-1
-​
- 
-​
- 
-Contrast:
+SSIM ≪ 1.0 → Significant visual change (strong LoRA effect)
 
-𝑐
-(
-𝑥
-,
-𝑦
-)
-=
-2
-𝜎
-𝑥
-𝜎
-𝑦
-+
-𝐶
-2
-𝜎
-𝑥
-2
-+
-𝜎
-𝑦
-2
-+
-𝐶
-2
-c(x,y)= 
-σ 
-x
-2
-​
- +σ 
-y
-2
-​
- +C 
-2
-​
- 
-2σ 
-x
-​
- σ 
-y
-​
- +C 
-2
-​
- 
-​
- 
-Structure:
+🔍 2. BRISQUE (Blind/Referenceless Image Spatial Quality Evaluator)
+BRISQUE assesses image quality without needing a reference image. It evaluates natural scene statistics and predicts how likely an image is to look "unnatural" or distorted.
 
-𝑠
-(
-𝑥
-,
-𝑦
-)
-=
-𝜎
-𝑥
-𝑦
-+
-𝐶
-3
-𝜎
-𝑥
-𝜎
-𝑦
-+
-𝐶
-3
-s(x,y)= 
-σ 
-x
-​
- σ 
-y
-​
- +C 
-3
-​
- 
-σ 
-xy
-​
- +C 
-3
-​
- 
-​
- 
-Constants 
-𝐶
-1
-,
-𝐶
-2
-,
-𝐶
-3
-C 
-1
-​
- ,C 
-2
-​
- ,C 
-3
-​
-  prevent division by zero (typically 
-𝐶
-3
-=
-𝐶
-2
-/
-2
-C 
-3
-​
- =C 
-2
-​
- /2).
+How it works:
 
-In practice, the script computes this with grayscale images and compares the LoRA image with the control image to see how much the LoRA has changed the result.
+Extracts features from local image patches
 
-📉 2. BRISQUE (No-Reference Quality Score)
-BRISQUE is a machine learning-based metric that predicts perceptual quality without a reference image. It works roughly like this:
+Uses a pretrained ML model (usually an SVM)
 
-Compute Natural Scene Statistics (NSS) features from the LoRA image.
+Outputs a quality score
 
-Feed these features into a pre-trained regression model (usually SVM) to output a quality score.
+Interpretation:
 
-The actual mathematics involve:
+Lower BRISQUE score → Better image quality (fewer distortions)
 
-Fitting a Generalized Gaussian Distribution (GGD) to image patches.
+Higher BRISQUE score → More artifacts or unnatural features
 
-Extracting features like local mean, variance, and shape parameters.
+🎯 Goal
+The LoRA Strength Analyzer helps you:
 
-The final score is derived from how much the image’s statistics deviate from what "natural images" look like.
+Identify the best LoRA strength for your use case
 
-The score is:
+Balance image similarity and perceptual quality
 
-Lower = better quality
-
-Higher = more distortions/artifacts
-
-🧠 Combined Insight
-In your app:
-
-SSIM measures how similar the image is to the original/control.
-
-BRISQUE measures how clean/good the image looks perceptually, regardless of the control.
-
-Together, they help:
-
-Detect if a LoRA strength introduces visual artifacts (high BRISQUE).
-
-See if it changes the image too much or not enough (via SSIM).
+Detect when a LoRA is too weak (SSIM too high) or too strong (BRISQUE too high)
 
 
 ## Features
