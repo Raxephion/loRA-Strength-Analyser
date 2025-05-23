@@ -5,58 +5,59 @@
 A Python script to analyze images generated using a LoRA (Low-Rank Adaptation) model applied at various strength levels. This tool helps determine an optimal strength for a given LoRA by evaluating image quality and similarity to control images.
 
 
-📊 What It Is
-LoRA Strength Analyzer is a utility for evaluating how different LoRA (Low-Rank Adaptation) strengths affect image quality and similarity. It compares each LoRA-generated image to a corresponding control image using two key metrics:
+### 🧠 1. Structural Similarity Index (SSIM)
 
-🧠 1. Structural Similarity Index (SSIM)
-SSIM measures how similar two images are in terms of luminance, contrast, and structure. The formula is:
-SSIM(x, y) = 
-    (2 * μx * μy + C1) * (2 * σxy + C2)
-    -----------------------------------
-    (μx² + μy² + C1) * (σx² + σy² + C2)
+SSIM measures the similarity between two images in terms of:
 
+*   Luminance
+*   Contrast
+*   Structural features
+
+It’s computed as:
+
+$$
+\text{SSIM}(x,y) = \frac{(2\mu_x\mu_y + C_1)(2\sigma_{xy} + C_2)}{(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}
+$$
 
 Where:
 
-μx, μy = mean of image patches x and y
+*   $\mu_x, \mu_y$: mean pixel intensities
+*   $\sigma_x, \sigma_y$: standard deviations
+*   $\sigma_{xy}$: cross-covariance
+*   $C_1, C_2$: constants to stabilize division
 
-σx², σy² = variance of x and y
+**Interpretation:**
 
-σxy = covariance between x and y
+*   SSIM ≈ 1.0 → Very similar (minimal LoRA effect)
+*   SSIM ≪ 1.0 → Significant difference (strong LoRA effect)
 
-C1, C2 = constants to avoid division by zero
+### 🔍 2. BRISQUE (Blind/Referenceless Image Spatial Quality Evaluator)
 
-Interpretation:
+BRISQUE estimates the perceptual quality of an image without needing a reference. It uses machine learning and natural scene statistics to assess artifacts and distortions.
 
-SSIM ≈ 1.0 → Very similar images (minimal LoRA effect)
+**How it works:**
 
-SSIM ≪ 1.0 → Significant visual change (strong LoRA effect)
+*   Extracts statistical features from image patches
+*   Feeds them into a pretrained model (typically SVM)
+*   Outputs a quality score
 
-🔍 2. BRISQUE (Blind/Referenceless Image Spatial Quality Evaluator)
-BRISQUE assesses image quality without needing a reference image. It evaluates natural scene statistics and predicts how likely an image is to look "unnatural" or distorted.
+**Interpretation:**
 
-How it works:
+*   Lower score → Better image quality
+*   Higher score → More visible artifacts, noise, or degradation
 
-Extracts features from local image patches
+## 🎯 Goal
 
-Uses a pretrained ML model (usually an SVM)
+By analyzing both:
 
-Outputs a quality score
+*   **SSIM** (similarity to original)
+*   **BRISQUE** (perceptual quality)
 
-Interpretation:
+The tool helps you:
 
-Lower BRISQUE score → Better image quality (fewer distortions)
-
-Higher BRISQUE score → More artifacts or unnatural features
-
-🎯 Goal
-The LoRA Strength Analyzer helps you:
-
-Identify the best LoRA strength for your use case
-
-Balance image similarity and perceptual quality
-
-Detect when a LoRA is too weak (SSIM too high) or too strong (BRISQUE too high)
+*   Detect the best LoRA strength for subtle or strong stylistic changes
+*   Avoid over-strengthening that introduces artifacts
+*   Maintain good image quality while applying desired effects
 
 
 ## Features
