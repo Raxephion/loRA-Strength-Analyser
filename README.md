@@ -4,6 +4,7 @@
 
 A Python script to analyze images generated using a LoRA (Low-Rank Adaptation) model applied at various strength levels. This tool helps determine an optimal strength for a given LoRA by evaluating image quality and similarity to control images.
 
+*(Note: Gradio webUI coming soon)*
 
 ### 🧠 1. Structural Similarity Index (SSIM)
 
